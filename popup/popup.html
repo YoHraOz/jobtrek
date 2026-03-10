@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Tracker</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+
+  <!-- ===== Header ===== -->
+  <div class="header">
+    <div class="header-left">
+      <img class="sidebar-icon" src="../icons/icon32.png" alt="Job Tracker">
+      <div>
+        <h1>Job Tracker <span class="job-count" id="jobCount"></span></h1>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Stats Bar ===== -->
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-chip"><span class="dot applied"></span> <span id="statApplied">0</span> Applied</div>
+    <div class="stat-chip"><span class="dot interview"></span> <span id="statInterview">0</span> Interview</div>
+    <div class="stat-chip"><span class="dot offer"></span> <span id="statOffer">0</span> Offer</div>
+    <div class="stat-chip"><span class="dot rejected"></span> <span id="statRejected">0</span> Rejected</div>
+  </div>
+
+  <!-- ===== Section Title ===== -->
+  <div class="section-title">Recent Applications</div>
+
+  <!-- ===== Job List ===== -->
+  <div class="job-list" id="jobList">
+    <!-- Populated by JS -->
+  </div>
+
+  <!-- ===== Empty State ===== -->
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <div class="empty-icon">📋</div>
+    <h3>No applications yet</h3>
+    <p>Click the + button to log your first job application</p>
+  </div>
+
+  <!-- ===== Floating Add Button ===== -->
+  <button class="fab" id="fabBtn" title="Add new job">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  </button>
+
+  <!-- ===== Footer ===== -->
+  <div class="footer">
+    <button class="dashboard-btn" id="dashboardBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      Open Full Dashboard
+    </button>
+  </div>
+
+  <!-- ===== Add / Edit Job Modal ===== -->
+  <div class="modal-overlay" id="addModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add New Application</h2>
+        <button class="modal-close" id="modalCloseBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editJobId">
+        <div class="form-group">
+          <label>Company *</label>
+          <input type="text" id="inputCompany" placeholder="e.g. Google">
+        </div>
+        <div class="form-group">
+          <label>Position *</label>
+          <input type="text" id="inputPosition" placeholder="e.g. Software Engineer">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Role ID</label>
+            <input type="text" id="inputRoleId" placeholder="e.g. SE-12345">
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="inputStatus">
+              <option value="Applied">Applied</option>
+              <option value="Interviewing">Interviewing</option>
+              <option value="Offer">Offer</option>
+              <option value="Rejected">Rejected</option>
+              <option value="Saved">Saved</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Location</label>
+            <input type="text" id="inputLocation" placeholder="e.g. San Francisco, CA">
+          </div>
+          <div class="form-group">
+            <label>Salary</label>
+            <input type="text" id="inputSalary" placeholder="e.g. $150k">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Industry</label>
+          <input type="text" id="inputIndustry" placeholder="e.g. Technology">
+        </div>
+        <div class="form-group">
+          <label>URL</label>
+          <input type="url" id="inputUrl" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label>Next Actions</label>
+          <ul class="next-actions-list" id="actionsList">
+            <li>
+              <span style="color:var(--text-muted);font-size:11px;">•</span>
+              <input type="text" placeholder="e.g. Follow up email">
+              <button class="remove-action" title="Remove">×</button>
+            </li>
+          </ul>
+          <button class="add-action-btn" id="addActionBtn">+ Add action</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="modalCancelBtn">Cancel</button>
+        <button class="btn btn-primary" id="modalSaveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Detail Modal ===== -->
+  <div class="modal-overlay detail-modal" id="detailModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="detailCompany">Company</h2>
+        <button class="modal-close" id="detailCloseBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body" id="detailBody">
+        <!-- Populated by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="detailEditBtn">Edit</button>
+        <button class="btn btn-primary" id="detailDoneBtn">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Toast ===== -->
+  <div class="toast" id="toast"></div>
+
+  <script src="../lib/storage.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

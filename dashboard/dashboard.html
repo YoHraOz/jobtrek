@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Tracker — Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <img class="sidebar-icon" src="../icons/icon48.png" alt="Job Tracker">
+      <span class="sidebar-title">Job Tracker</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-filter="all">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+        All Applications
+        <span class="nav-count" id="navAll">0</span>
+      </button>
+      <button class="nav-item" data-filter="Applied">
+        <span class="nav-dot" style="background:var(--accent);"></span>
+        Applied
+        <span class="nav-count" id="navApplied">0</span>
+      </button>
+      <button class="nav-item" data-filter="Interviewing">
+        <span class="nav-dot" style="background:var(--warning);"></span>
+        Interviewing
+        <span class="nav-count" id="navInterviewing">0</span>
+      </button>
+      <button class="nav-item" data-filter="Offer">
+        <span class="nav-dot" style="background:var(--success);"></span>
+        Offer
+        <span class="nav-count" id="navOffer">0</span>
+      </button>
+      <button class="nav-item" data-filter="Rejected">
+        <span class="nav-dot" style="background:var(--danger);"></span>
+        Rejected
+        <span class="nav-count" id="navRejected">0</span>
+      </button>
+      <button class="nav-item" data-filter="Saved">
+        <span class="nav-dot" style="background:#af82ff;"></span>
+        Saved
+        <span class="nav-count" id="navSaved">0</span>
+      </button>
+    </nav>
+  </aside>
+
+  <!-- ===== Main Content ===== -->
+  <main class="main">
+    <!-- Top Bar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1 id="pageTitle">All Applications</h1>
+        <span class="topbar-count" id="topbarCount">0 jobs</span>
+      </div>
+      <div class="topbar-actions">
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchInput" placeholder="Search jobs...">
+        </div>
+        <select id="sortSelect" class="sort-select">
+          <option value="date-desc">Newest First</option>
+          <option value="date-asc">Oldest First</option>
+          <option value="company-asc">Company A–Z</option>
+          <option value="company-desc">Company Z–A</option>
+        </select>
+        <button class="btn-add" id="addBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          New
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card">
+        <div class="stat-number" id="dashStatTotal">0</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number accent" id="dashStatApplied">0</div>
+        <div class="stat-label">Applied</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number warning" id="dashStatInterview">0</div>
+        <div class="stat-label">Interviewing</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number success" id="dashStatOffer">0</div>
+        <div class="stat-label">Offers</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number danger" id="dashStatRejected">0</div>
+        <div class="stat-label">Rejected</div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrapper">
+      <table class="job-table">
+        <thead>
+          <tr>
+            <th class="col-company">Company</th>
+            <th class="col-role">Position</th>
+            <th class="col-status">Status</th>
+            <th class="col-location">Location</th>
+            <th class="col-industry">Industry</th>
+            <th class="col-salary">Salary</th>
+            <th class="col-date">Date</th>
+            <th class="col-actions"></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+      <div class="empty-dash" id="emptyDash" style="display:none;">
+        <div class="empty-icon">📋</div>
+        <h3>No applications found</h3>
+        <p>Add your first job application to get started</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Add/Edit Modal ===== -->
+  <div class="modal-overlay" id="addModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add New Application</h2>
+        <button class="modal-close" id="modalCloseBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editJobId">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Company *</label>
+            <input type="text" id="inputCompany" placeholder="e.g. Google">
+          </div>
+          <div class="form-group">
+            <label>Position *</label>
+            <input type="text" id="inputPosition" placeholder="e.g. Software Engineer">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Role ID</label>
+            <input type="text" id="inputRoleId" placeholder="e.g. SE-12345">
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="inputStatus">
+              <option value="Applied">Applied</option>
+              <option value="Interviewing">Interviewing</option>
+              <option value="Offer">Offer</option>
+              <option value="Rejected">Rejected</option>
+              <option value="Saved">Saved</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Location</label>
+            <input type="text" id="inputLocation" placeholder="e.g. San Francisco, CA">
+          </div>
+          <div class="form-group">
+            <label>Salary</label>
+            <input type="text" id="inputSalary" placeholder="e.g. $150k">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Industry</label>
+            <input type="text" id="inputIndustry" placeholder="e.g. Technology">
+          </div>
+          <div class="form-group">
+            <label>URL</label>
+            <input type="url" id="inputUrl" placeholder="https://...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Next Actions</label>
+          <ul class="next-actions-list" id="actionsList">
+            <li>
+              <span class="bullet">•</span>
+              <input type="text" placeholder="e.g. Follow up email">
+              <button class="remove-action" title="Remove">×</button>
+            </li>
+          </ul>
+          <button class="add-action-btn" id="addActionBtn">+ Add action</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="modalCancelBtn">Cancel</button>
+        <button class="btn btn-primary" id="modalSaveBtn">Save Application</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Detail Drawer ===== -->
+  <div class="drawer-overlay" id="drawerOverlay">
+    <div class="drawer" id="drawer">
+      <div class="drawer-header">
+        <h2 id="drawerCompany">Company</h2>
+        <div class="drawer-header-actions">
+          <button class="btn-icon" id="drawerEditBtn" title="Edit">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn-icon" id="drawerCloseBtn" title="Close">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="drawer-body" id="drawerBody">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Toast ===== -->
+  <div class="toast" id="toast"></div>
+
+  <script src="../lib/storage.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

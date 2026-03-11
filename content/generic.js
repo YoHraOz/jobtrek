@@ -2,79 +2,82 @@
 /* Floating button + right-side panel on job platforms & /jobs/ URLs */
 
 (() => {
-  'use strict';
+  "use strict";
 
   /* ---- Guard: only run on matching sites ---- */
   const url = window.location.href.toLowerCase();
   const hostname = window.location.hostname.toLowerCase();
 
   const JOB_PLATFORMS = [
-    'linkedin.com',
-    'naukri.com',
-    'indeed.com',
-    'glassdoor.com',
-    'glassdoor.co.in',
-    'wellfound.com',
-    'lever.co',
-    'greenhouse.io',
-    'jobs.lever.co',
-    'boards.greenhouse.io',
-    'ziprecruiter.com',
-    'monster.com',
-    'simplyhired.com',
-    'dice.com',
-    'hired.com',
-    'angel.co',
-    'remoteok.com',
-    'weworkremotely.com',
-    'flexjobs.com',
-    'instahyre.com',
-    'hirist.com',
-    'cutshort.io',
-    'foundit.in',
-    'apna.co',
-    'internshala.com',
-    'workindia.in',
-    'myworkdayjobs.com',
-    'myworkday.com',
-    'smartrecruiters.com',
-    'jobvite.com',
-    'icims.com',
-    'ashbyhq.com',
-    'breezy.hr',
-    'workable.com',
-    'recruitee.com',
-    'bamboohr.com',
-    'applytojob.com',
-    'taleo.net',
-    'successfactors.com',
+    "linkedin.com",
+    "naukri.com",
+    "indeed.com",
+    "glassdoor.com",
+    "glassdoor.co.in",
+    "wellfound.com",
+    "lever.co",
+    "greenhouse.io",
+    "jobs.lever.co",
+    "boards.greenhouse.io",
+    "ziprecruiter.com",
+    "monster.com",
+    "simplyhired.com",
+    "dice.com",
+    "hired.com",
+    "angel.co",
+    "remoteok.com",
+    "weworkremotely.com",
+    "flexjobs.com",
+    "instahyre.com",
+    "hirist.com",
+    "cutshort.io",
+    "foundit.in",
+    "apna.co",
+    "internshala.com",
+    "workindia.in",
+    "myworkdayjobs.com",
+    "myworkday.com",
+    "smartrecruiters.com",
+    "jobvite.com",
+    "icims.com",
+    "ashbyhq.com",
+    "breezy.hr",
+    "workable.com",
+    "recruitee.com",
+    "bamboohr.com",
+    "applytojob.com",
+    "taleo.net",
+    "successfactors.com",
   ];
 
-  const isJobPlatform = JOB_PLATFORMS.some(d => hostname.includes(d));
-  const hasJobPath = /\/(jobs?|careers?|openings?|vacancies|positions)(\/|$|\?|#)/i.test(window.location.pathname);
+  const isJobPlatform = JOB_PLATFORMS.some((d) => hostname.includes(d));
+  const hasJobPath =
+    /\/(jobs?|careers?|openings?|vacancies|positions)(\/|$|\?|#)/i.test(
+      window.location.pathname,
+    );
   const hasJobHostname = /\b(jobs?|careers?)\./i.test(hostname);
 
   if (!isJobPlatform && !hasJobPath && !hasJobHostname) return;
 
   /* ---- Prevent double-injection (SPAs) ---- */
-  if (document.getElementById('jt-fab')) return;
+  if (document.getElementById("jt-fab")) return;
 
   /* ---- Shadow host (isolates our styles from the page) ---- */
-  const host = document.createElement('div');
-  host.id = 'jt-fab';
-  host.style.cssText = 'all:initial; position:fixed; z-index:2147483647;';
+  const host = document.createElement("div");
+  host.id = "jt-fab";
+  host.style.cssText = "all:initial; position:fixed; z-index:2147483647;";
   document.documentElement.appendChild(host);
-  const shadow = host.attachShadow({ mode: 'closed' });
+  const shadow = host.attachShadow({ mode: "closed" });
 
   /* ---- Inject CSS into shadow DOM ---- */
-  const style = document.createElement('style');
+  const style = document.createElement("style");
   style.textContent = JT_STYLES();
   shadow.appendChild(style);
 
   /* ---- Floating button ---- */
-  const fab = document.createElement('button');
-  fab.className = 'jt-fab';
-  fab.setAttribute('aria-label', 'Track this job');
+  const fab = document.createElement("button");
+  fab.className = "jt-fab";
+  fab.setAttribute("aria-label", "Track this job");
   fab.innerHTML = `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
          stroke-linecap="round" stroke-linejoin="round">
@@ -87,11 +90,11 @@
   shadow.appendChild(fab);
 
   /* ---- Right-side panel ---- */
-  const overlay = document.createElement('div');
-  overlay.className = 'jt-overlay';
+  const overlay = document.createElement("div");
+  overlay.className = "jt-overlay";
 
-  const panel = document.createElement('div');
-  panel.className = 'jt-panel';
+  const panel = document.createElement("div");
+  panel.className = "jt-panel";
   panel.innerHTML = `
     <div class="jt-panel-header">
       <h2>Add New Application</h2>
@@ -202,36 +205,44 @@
 
   /* ---- Refs inside shadow ---- */
   const $ = (sel) => shadow.querySelector(sel);
-  const closeBtn    = $('.jt-close');
-  const cancelBtn   = $('#jt-cancel');
-  const saveBtn     = $('#jt-save');
-  const toastEl     = $('#jt-toast');
-  const urlInput    = $('#jt-url');
-  const actionsList = $('#jt-actionsList');
-  const addActionBtn = $('#jt-addAction');
+  const closeBtn = $(".jt-close");
+  const cancelBtn = $("#jt-cancel");
+  const saveBtn = $("#jt-save");
+  const toastEl = $("#jt-toast");
+  const urlInput = $("#jt-url");
+  const actionsList = $("#jt-actionsList");
+  const addActionBtn = $("#jt-addAction");
 
   /* ---- Next Actions ---- */
-  function addActionRow(value = '') {
-    const li = document.createElement('li');
+  function addActionRow(value = "") {
+    const li = document.createElement("li");
     li.innerHTML = `
       <span class="jt-action-dot">•</span>
       <input class="jt-action-input" type="text" placeholder="e.g. Follow up email" value="${escapeAttr(value)}">
       <button class="jt-remove-action" title="Remove">×</button>
     `;
-    li.querySelector('.jt-remove-action').addEventListener('click', () => li.remove());
+    li.querySelector(".jt-remove-action").addEventListener("click", () =>
+      li.remove(),
+    );
     actionsList.appendChild(li);
   }
 
   // Bind the initial row's remove button
-  actionsList.querySelector('.jt-remove-action').addEventListener('click', function() {
-    this.closest('li').remove();
-  });
+  actionsList
+    .querySelector(".jt-remove-action")
+    .addEventListener("click", function () {
+      this.closest("li").remove();
+    });
 
-  addActionBtn.addEventListener('click', () => addActionRow());
+  addActionBtn.addEventListener("click", () => addActionRow());
 
   function escapeAttr(str) {
-    if (!str) return '';
-    return str.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    if (!str) return "";
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
   }
 
   /* ---- Auto-fill helpers ---- */
@@ -239,74 +250,84 @@
   /** Grab text from the first matching selector, trimmed. */
   function txt(sel) {
     const el = document.querySelector(sel);
-    return el ? el.textContent.trim() : '';
+    return el ? el.textContent.trim() : "";
   }
 
   /** Grab a meta tag's content. */
   function meta(attr, val) {
     const el = document.querySelector(`meta[${attr}="${val}"]`);
-    return el ? (el.content || '').trim() : '';
+    return el ? (el.content || "").trim() : "";
   }
 
   /** Try to parse JSON-LD JobPosting schema from the page. */
   function getJobPostingLD() {
     try {
-      const scripts = document.querySelectorAll('script[type="application/ld+json"]');
+      const scripts = document.querySelectorAll(
+        'script[type="application/ld+json"]',
+      );
       for (const s of scripts) {
         const data = JSON.parse(s.textContent);
         // Could be a single object or an array
         const items = Array.isArray(data) ? data : [data];
         for (const item of items) {
-          if (item['@type'] === 'JobPosting') return item;
+          if (item["@type"] === "JobPosting") return item;
           // Sometimes nested inside @graph
-          if (item['@graph']) {
-            const found = item['@graph'].find(g => g['@type'] === 'JobPosting');
+          if (item["@graph"]) {
+            const found = item["@graph"].find(
+              (g) => g["@type"] === "JobPosting",
+            );
             if (found) return found;
           }
         }
       }
-    } catch (e) { /* ignore parse errors */ }
+    } catch (e) {
+      /* ignore parse errors */
+    }
     return null;
   }
 
   /** Return first non-empty value from an array of candidates. */
   function first(...vals) {
     for (const v of vals) {
-      if (v && typeof v === 'string' && v.trim()) return v.trim();
+      if (v && typeof v === "string" && v.trim()) return v.trim();
     }
-    return '';
+    return "";
   }
 
   /** Platform-specific scraping strategies. */
   function scrapeLinkedIn() {
     return {
       company: first(
-        txt('.job-details-jobs-unified-top-card__company-name a'),
-        txt('.job-details-jobs-unified-top-card__company-name'),
-        txt('.topcard__org-name-link'),
-        txt('.jobs-unified-top-card__company-name a'),
-        txt('.jobs-unified-top-card__company-name'),
+        txt(".job-details-jobs-unified-top-card__company-name a"),
+        txt(".job-details-jobs-unified-top-card__company-name"),
+        txt(".topcard__org-name-link"),
+        txt(".jobs-unified-top-card__company-name a"),
+        txt(".jobs-unified-top-card__company-name"),
       ),
       position: first(
-        txt('.job-details-jobs-unified-top-card__job-title h1'),
-        txt('.job-details-jobs-unified-top-card__job-title'),
-        txt('.topcard__title'),
-        txt('.jobs-unified-top-card__job-title'),
-        txt('h1'),
+        txt(".job-details-jobs-unified-top-card__job-title h1"),
+        txt(".job-details-jobs-unified-top-card__job-title"),
+        txt(".topcard__title"),
+        txt(".jobs-unified-top-card__job-title"),
+        txt("h1"),
       ),
       location: first(
-        txt('.job-details-jobs-unified-top-card__primary-description-container .tvm__text'),
-        txt('.job-details-jobs-unified-top-card__bullet'),
-        txt('.topcard__flavor--bullet'),
-        txt('.jobs-unified-top-card__bullet'),
-        txt('.jobs-unified-top-card__subtitle .jobs-unified-top-card__subtitle-primary-grouping .t-black--light span'),
+        txt(
+          ".job-details-jobs-unified-top-card__primary-description-container .tvm__text",
+        ),
+        txt(".job-details-jobs-unified-top-card__bullet"),
+        txt(".topcard__flavor--bullet"),
+        txt(".jobs-unified-top-card__bullet"),
+        txt(
+          ".jobs-unified-top-card__subtitle .jobs-unified-top-card__subtitle-primary-grouping .t-black--light span",
+        ),
         txt('[class*="top-card"] [class*="bullet"]'),
         txt('[class*="top-card"] [class*="location"]'),
       ),
-      roleId: '',
+      roleId: "",
       salary: first(
-        txt('.job-details-jobs-unified-top-card__job-insight--highlight span'),
-        txt('.salary-main-rail__data-body'),
+        txt(".job-details-jobs-unified-top-card__job-insight--highlight span"),
+        txt(".salary-main-rail__data-body"),
         txt('[class*="salary"]'),
       ),
     };
@@ -317,30 +338,30 @@
       company: first(
         txt('[data-testid="inlineHeader-companyName"] a'),
         txt('[data-testid="inlineHeader-companyName"]'),
-        txt('.jobsearch-InlineCompanyRating-companyHeader a'),
-        txt('.jobsearch-InlineCompanyRating a'),
-        txt('.css-1saizt3'),
+        txt(".jobsearch-InlineCompanyRating-companyHeader a"),
+        txt(".jobsearch-InlineCompanyRating a"),
+        txt(".css-1saizt3"),
       ),
       position: first(
         txt('[data-testid="jobsearch-JobInfoHeader-title"]'),
-        txt('.jobsearch-JobInfoHeader-title'),
-        txt('h1.icl-u-xs-mb--xs'),
-        txt('h1'),
+        txt(".jobsearch-JobInfoHeader-title"),
+        txt("h1.icl-u-xs-mb--xs"),
+        txt("h1"),
       ),
       location: first(
         txt('[data-testid="inlineHeader-companyLocation"]'),
         txt('[data-testid="job-location"]'),
         txt('[data-testid="jobsearch-JobInfoHeader-companyLocation"]'),
-        txt('.jobsearch-JobInfoHeader-subtitle .css-6z8o9s'),
-        txt('.jobsearch-JobMetadataFooter div'),
-        txt('#jobLocationText'),
+        txt(".jobsearch-JobInfoHeader-subtitle .css-6z8o9s"),
+        txt(".jobsearch-JobMetadataFooter div"),
+        txt("#jobLocationText"),
         txt('[class*="companyLocation"]'),
       ),
-      roleId: '',
+      roleId: "",
       salary: first(
         txt('[data-testid="attribute_snippet_testid"]'),
-        txt('#salaryInfoAndJobType span'),
-        txt('.jobsearch-JobMetadataHeader-item'),
+        txt("#salaryInfoAndJobType span"),
+        txt(".jobsearch-JobMetadataHeader-item"),
       ),
     };
   }
@@ -348,24 +369,24 @@
   function scrapeNaukri() {
     return {
       company: first(
-        txt('.styles_jd-header-comp-name__MvqAI a'),
-        txt('[data-company-name]'),
-        txt('.jd-header-comp-name a'),
-        txt('.comp-name a'),
+        txt(".styles_jd-header-comp-name__MvqAI a"),
+        txt("[data-company-name]"),
+        txt(".jd-header-comp-name a"),
+        txt(".comp-name a"),
       ),
       position: first(
-        txt('.styles_jd-header-title__rZwM1'),
-        txt('.jd-header-title'),
-        txt('h1.jd-header-title'),
-        txt('h1'),
+        txt(".styles_jd-header-title__rZwM1"),
+        txt(".jd-header-title"),
+        txt("h1.jd-header-title"),
+        txt("h1"),
       ),
       location: first(
-        txt('.styles_jhc__loc___Du2H span'),
+        txt(".styles_jhc__loc___Du2H span"),
         txt('[class*="jhc__loc"] span'),
         txt('[class*="jhc__loc"]'),
-        txt('.loc_tg span'),
-        txt('.loc .locWdth'),
-        txt('.location a'),
+        txt(".loc_tg span"),
+        txt(".loc .locWdth"),
+        txt(".location a"),
         txt('[class*="loc"] span a'),
         txt('[class*="loc"] a'),
         txt('[class*="location"]'),
@@ -373,20 +394,22 @@
       roleId: first(
         // Naukri sometimes shows Job ID in the details
         (() => {
-          const labels = document.querySelectorAll('.styles_details__Y424J .styles_detail-row__RLBaK, .other-details .details-row');
+          const labels = document.querySelectorAll(
+            ".styles_details__Y424J .styles_detail-row__RLBaK, .other-details .details-row",
+          );
           for (const el of labels) {
             if (/role|job\s*id/i.test(el.textContent)) {
-              const val = el.querySelector('span:last-child, a');
-              return val ? val.textContent.trim() : '';
+              const val = el.querySelector("span:last-child, a");
+              return val ? val.textContent.trim() : "";
             }
           }
-          return '';
+          return "";
         })(),
       ),
       salary: first(
-        txt('.styles_jhc__salary__jdfEC span'),
-        txt('.salary .sal'),
-        txt('.salWdth'),
+        txt(".styles_jhc__salary__jdfEC span"),
+        txt(".salary .sal"),
+        txt(".salWdth"),
       ),
     };
   }
@@ -395,25 +418,25 @@
     return {
       company: first(
         txt('[data-test="employer-name"]'),
-        txt('.EmployerProfile_employerName__0nXHO'),
-        txt('.employerName'),
-        txt('.css-87uc0g'),
+        txt(".EmployerProfile_employerName__0nXHO"),
+        txt(".employerName"),
+        txt(".css-87uc0g"),
       ),
       position: first(
         txt('[data-test="job-title"]'),
-        txt('.JobDetails_jobTitle__Rw_gn'),
-        txt('h1'),
+        txt(".JobDetails_jobTitle__Rw_gn"),
+        txt("h1"),
       ),
       location: first(
         txt('[data-test="location"]'),
-        txt('.JobDetails_location__mSg5h'),
-        txt('.location'),
+        txt(".JobDetails_location__mSg5h"),
+        txt(".location"),
       ),
-      roleId: '',
+      roleId: "",
       salary: first(
         txt('[data-test="detailSalary"]'),
-        txt('.SalaryEstimate_salaryRange__brHFy'),
-        txt('.css-1xe2xww'),
+        txt(".SalaryEstimate_salaryRange__brHFy"),
+        txt(".css-1xe2xww"),
       ),
     };
   }
@@ -421,69 +444,70 @@
   function scrapeLever() {
     return {
       company: first(
-        txt('.main-footer-text a'),
-        meta('property', 'og:site_name'),
+        txt(".main-footer-text a"),
+        meta("property", "og:site_name"),
       ),
-      position: first(
-        txt('.posting-headline h2'),
-        txt('h1'),
-      ),
+      position: first(txt(".posting-headline h2"), txt("h1")),
       location: first(
-        txt('.posting-categories .location'),
-        txt('.sort-by-time .posting-category:first-child'),
+        txt(".posting-categories .location"),
+        txt(".sort-by-time .posting-category:first-child"),
       ),
-      roleId: '',
-      salary: '',
+      roleId: "",
+      salary: "",
     };
   }
 
   function scrapeGreenhouse() {
     return {
-      company: first(
-        txt('.company-name'),
-        meta('property', 'og:site_name'),
-      ),
-      position: first(
-        txt('.app-title'),
-        txt('h1.heading'),
-        txt('h1'),
-      ),
-      location: first(
-        txt('.location'),
-        txt('.body--metadata div'),
-      ),
-      roleId: '',
-      salary: '',
+      company: first(txt(".company-name"), meta("property", "og:site_name")),
+      position: first(txt(".app-title"), txt("h1.heading"), txt("h1")),
+      location: first(txt(".location"), txt(".body--metadata div")),
+      roleId: "",
+      salary: "",
     };
   }
 
   /** Generic strategy: JSON-LD → meta tags → common selectors → page text patterns */
   function scrapeGeneric() {
     const ld = getJobPostingLD();
-    const result = { company: '', position: '', location: '', roleId: '', salary: '' };
+    const result = {
+      company: "",
+      position: "",
+      location: "",
+      roleId: "",
+      salary: "",
+    };
 
     if (ld) {
       // Company
       if (ld.hiringOrganization) {
-        result.company = typeof ld.hiringOrganization === 'string'
-          ? ld.hiringOrganization
-          : (ld.hiringOrganization.name || '');
+        result.company =
+          typeof ld.hiringOrganization === "string"
+            ? ld.hiringOrganization
+            : ld.hiringOrganization.name || "";
       }
       // Position
-      result.position = ld.title || '';
+      result.position = ld.title || "";
       // Location
       if (ld.jobLocation) {
-        const loc = Array.isArray(ld.jobLocation) ? ld.jobLocation[0] : ld.jobLocation;
+        const loc = Array.isArray(ld.jobLocation)
+          ? ld.jobLocation[0]
+          : ld.jobLocation;
         if (loc && loc.address) {
           const a = loc.address;
-          result.location = [a.addressLocality, a.addressRegion, a.addressCountry]
-            .filter(Boolean).join(', ');
+          result.location = [
+            a.addressLocality,
+            a.addressRegion,
+            a.addressCountry,
+          ]
+            .filter(Boolean)
+            .join(", ");
         }
       }
       // Salary
       if (ld.baseSalary && ld.baseSalary.value) {
         const sv = ld.baseSalary.value;
-        const currency = ld.baseSalary.currency || '';
+        const currency = ld.baseSalary.currency || "";
         if (sv.minValue && sv.maxValue) {
           result.salary = `${currency} ${sv.minValue} – ${sv.maxValue}`;
         } else if (sv.value) {
@@ -492,9 +516,10 @@
       }
       // Role ID / identifier
       if (ld.identifier) {
-        result.roleId = typeof ld.identifier === 'string'
-          ? ld.identifier
-          : (ld.identifier.value || ld.identifier.name || '');
+        result.roleId =
+          typeof ld.identifier === "string"
+            ? ld.identifier
+            : ld.identifier.value || ld.identifier.name || "";
       }
     }
 
@@ -504,7 +529,7 @@
   /** Try page text for a Job ID pattern if nothing else found. */
   function scrapeRoleIdFromText() {
     // Look for common "Job ID: XXXX" patterns in the page
-    const body = document.body.innerText || '';
+    const body = document.body.innerText || "";
     const patterns = [
       /(?:job\s*(?:id|#|number|code|ref(?:erence)?)\s*[:\-–]\s*)([A-Za-z0-9\-_]{2,30})/i,
       /(?:req(?:uisition)?\s*(?:id|#|number)\s*[:\-–]\s*)([A-Za-z0-9\-_]{2,30})/i,
@@ -515,19 +540,23 @@
       const m = body.match(pat);
       if (m && m[1]) return m[1];
     }
-    return '';
+    return "";
   }
 
   /** Try page text for salary if nothing else found. */
   function scrapeSalaryFromText() {
-    const body = document.body.innerText || '';
+    const body = document.body.innerText || "";
     // Match patterns like "$120k - $180k", "₹10,00,000 - ₹20,00,000", "€60.000 – €80.000"
-    const m = body.match(/[\$₹€£]\s?[\d,\.]+[\s]*[kK]?\s*[-–—to]+\s*[\$₹€£]?\s?[\d,\.]+[\s]*[kK]?(?:\s*(?:per|\/)\s*(?:year|annum|yr|month|mo))?/);
+    const m = body.match(
+      /[\$₹€£]\s?[\d,\.]+[\s]*[kK]?\s*[-–—to]+\s*[\$₹€£]?\s?[\d,\.]+[\s]*[kK]?(?:\s*(?:per|\/)\s*(?:year|annum|yr|month|mo))?/,
+    );
     if (m) return m[0].trim();
     // Also try "CTC: 10-20 LPA" pattern common on Indian platforms
-    const m2 = body.match(/(?:CTC|salary|compensation|package)\s*[:\-–]?\s*([\d,\.]+\s*[-–to]+\s*[\d,\.]+\s*(?:LPA|lpa|Lacs?|Lakhs?|Cr|CPA|K|k)?)/i);
+    const m2 = body.match(
+      /(?:CTC|salary|compensation|package)\s*[:\-–]?\s*([\d,\.]+\s*[-–to]+\s*[\d,\.]+\s*(?:LPA|lpa|Lacs?|Lakhs?|Cr|CPA|K|k)?)/i,
+    );
     if (m2) return m2[1].trim();
-    return '';
+    return "";
   }
 
   /** Try page text for location if nothing else found. */
@@ -541,8 +570,8 @@
       '[data-automation="job-detail-location"]',
       '[data-testid*="location" i]',
       '[aria-label*="location" i]',
-      '.location',
-      '#location',
+      ".location",
+      "#location",
     ];
     for (const sel of domSelectors) {
       try {
@@ -552,15 +581,22 @@
           // Filter out noise: too short, too long, or just the word "location"
           if (t.length > 2 && t.length < 100 && !/^location$/i.test(t)) {
             // Strip leading label like "Location: " or "Location\n"
-            const cleaned = t.replace(/^(?:location|job\s*location|work\s*location)\s*[:\-–\n]\s*/i, '').trim();
+            const cleaned = t
+              .replace(
+                /^(?:location|job\s*location|work\s*location)\s*[:\-–\n]\s*/i,
+                "",
+              )
+              .trim();
             if (cleaned.length > 2) return cleaned;
           }
         }
-      } catch (e) { /* selector may be invalid, skip */ }
+      } catch (e) {
+        /* selector may be invalid, skip */
+      }
     }
 
     // 2. Scan text with multiple patterns (case-insensitive)
-    const body = document.body.innerText || '';
+    const body = document.body.innerText || "";
     const patterns = [
       /(?:location|job\s*location|work\s*location|workplace|office|office\s*location|based\s+(?:in|at))\s*[:\-–|]\s*(.+)/im,
       /(?:location|job\s*location)\s*\n\s*(.+)/im,
@@ -569,74 +605,90 @@
       const m = body.match(pat);
       if (m && m[1]) {
         // Take first line only, trim
-        const loc = m[1].split('\n')[0].trim();
+        const loc = m[1].split("\n")[0].trim();
         if (loc.length > 2 && loc.length < 100) return loc;
       }
     }
-    return '';
+    return "";
   }
 
   function autoFill() {
     urlInput.value = window.location.href;
 
     // Determine which platform scraper to use
-    let scraped = { company: '', position: '', location: '', roleId: '', salary: '' };
+    let scraped = {
+      company: "",
+      position: "",
+      location: "",
+      roleId: "",
+      salary: "",
+    };
 
-    if (hostname.includes('linkedin.com')) {
+    if (hostname.includes("linkedin.com")) {
       scraped = scrapeLinkedIn();
-    } else if (hostname.includes('indeed.com')) {
+    } else if (hostname.includes("indeed.com")) {
       scraped = scrapeIndeed();
-    } else if (hostname.includes('naukri.com') || hostname.includes('foundit.in')) {
+    } else if (
+      hostname.includes("naukri.com") ||
+      hostname.includes("foundit.in")
+    ) {
       scraped = scrapeNaukri();
-    } else if (hostname.includes('glassdoor.com') || hostname.includes('glassdoor.co.in')) {
+    } else if (
+      hostname.includes("glassdoor.com") ||
+      hostname.includes("glassdoor.co.in")
+    ) {
       scraped = scrapeGlassdoor();
-    } else if (hostname.includes('lever.co')) {
+    } else if (hostname.includes("lever.co")) {
       scraped = scrapeLever();
-    } else if (hostname.includes('greenhouse.io')) {
+    } else if (hostname.includes("greenhouse.io")) {
       scraped = scrapeGreenhouse();
     }
 
     // Layer generic JSON-LD / meta on top of any empty fields
     const generic = scrapeGeneric();
-    scraped.company  = scraped.company  || generic.company;
+    scraped.company = scraped.company || generic.company;
     scraped.position = scraped.position || generic.position;
     scraped.location = scraped.location || generic.location;
-    scraped.roleId   = scraped.roleId   || generic.roleId;
-    scraped.salary   = scraped.salary   || generic.salary;
+    scraped.roleId = scraped.roleId || generic.roleId;
+    scraped.salary = scraped.salary || generic.salary;
 
     // Fallbacks: og/meta tags and common selectors
-    scraped.company  = scraped.company  || meta('property', 'og:site_name');
+    scraped.company = scraped.company || meta("property", "og:site_name");
 
     if (!scraped.position) {
-      const h1 = document.querySelector('h1');
+      const h1 = document.querySelector("h1");
       if (h1 && h1.textContent.trim().length < 120) {
         scraped.position = h1.textContent.trim();
       } else {
-        const ogTitle = meta('property', 'og:title');
+        const ogTitle = meta("property", "og:title");
         if (ogTitle) scraped.position = ogTitle;
       }
     }
 
-    scraped.location = scraped.location
-      || meta('property', 'og:locality')
-      || meta('name', 'geo.placename')
-      || meta('name', 'geo.region')
-      || txt('[itemprop="jobLocation"] [itemprop="addressLocality"]')
-      || txt('[itemprop="jobLocation"]')
-      || txt('[itemprop="addressLocality"]');
+    scraped.location =
+      scraped.location ||
+      meta("property", "og:locality") ||
+      meta("name", "geo.placename") ||
+      meta("name", "geo.region") ||
+      txt('[itemprop="jobLocation"] [itemprop="addressLocality"]') ||
+      txt('[itemprop="jobLocation"]') ||
+      txt('[itemprop="addressLocality"]');
 
     // Last-resort: text / DOM pattern matching
-    scraped.roleId   = scraped.roleId   || scrapeRoleIdFromText();
-    scraped.salary   = scraped.salary   || scrapeSalaryFromText();
+    scraped.roleId = scraped.roleId || scrapeRoleIdFromText();
+    scraped.salary = scraped.salary || scrapeSalaryFromText();
     scraped.location = scraped.location || scrapeLocationFromText();
 
     // Fallback company from domain (only for non-platform sites)
-    if (!scraped.company && !JOB_PLATFORMS.some(d => hostname.includes(d))) {
+    if (!scraped.company && !JOB_PLATFORMS.some((d) => hostname.includes(d))) {
       // Strip common job/career subdomains to get the real company name
       const cleanHost = hostname
-        .replace(/^(www|jobs?|careers?|recruiting|hire|work|apply|talent|people|team|join|boards?)\./i, '')
-        .replace(/^(www)\./i, '');
-      const parts = cleanHost.split('.');
+        .replace(
+          /^(www|jobs?|careers?|recruiting|hire|work|apply|talent|people|team|join|boards?)\./i,
+          "",
+        )
+        .replace(/^(www)\./i, "");
+      const parts = cleanHost.split(".");
       if (parts.length > 0 && parts[0].length > 1) {
         scraped.company = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
       }
@@ -644,11 +696,11 @@
 
     // Apply to form fields (only fill empty inputs)
     const fieldMap = {
-      '#jt-company':  scraped.company,
-      '#jt-position': scraped.position,
-      '#jt-location': scraped.location,
-      '#jt-roleId':   scraped.roleId,
-      '#jt-salary':   scraped.salary,
+      "#jt-company": scraped.company,
+      "#jt-position": scraped.position,
+      "#jt-location": scraped.location,
+      "#jt-roleId": scraped.roleId,
+      "#jt-salary": scraped.salary,
     };
 
     for (const [sel, val] of Object.entries(fieldMap)) {
@@ -659,28 +711,31 @@
     }
 
     // Auto-detect platform and select chip
-    const hidden = $('#jt-applyThrough');
+    const hidden = $("#jt-applyThrough");
     if (!hidden.value) {
       const platformMap = {
-        'linkedin.com': 'LinkedIn',
-        'indeed.com': 'Indeed',
-        'naukri.com': 'Naukri',
-        'glassdoor.com': 'Glassdoor',
+        "linkedin.com": "LinkedIn",
+        "indeed.com": "Indeed",
+        "naukri.com": "Naukri",
+        "glassdoor.com": "Glassdoor",
       };
       for (const [domain, label] of Object.entries(platformMap)) {
         if (hostname.includes(domain)) {
           hidden.value = label;
-          root.querySelectorAll('.jt-platform-chip').forEach(c => {
-            c.classList.toggle('jt-chip-selected', c.dataset.value === label);
+          shadow.querySelectorAll(".jt-platform-chip").forEach((c) => {
+            c.classList.toggle("jt-chip-selected", c.dataset.value === label);
           });
           break;
         }
       }
       // If no known platform matched, select "Company Website"
       if (!hidden.value) {
-        hidden.value = 'Company Website';
-        root.querySelectorAll('.jt-platform-chip').forEach(c => {
-          c.classList.toggle('jt-chip-selected', c.dataset.value === 'Company Website');
+        hidden.value = "Company Website";
+        shadow.querySelectorAll(".jt-platform-chip").forEach((c) => {
+          c.classList.toggle(
+            "jt-chip-selected",
+            c.dataset.value === "Company Website",
+          );
         });
       }
     }
@@ -688,7 +743,7 @@
 
   /* ---- Open / Close ---- */
   let isOpen = false;
-  let lastTrackedUrl = '';
+  let lastTrackedUrl = "";
 
   function openPanel() {
     isOpen = true;
@@ -700,54 +755,72 @@
     }
     lastTrackedUrl = currentUrl;
 
-    overlay.classList.add('jt-open');
-    fab.classList.add('jt-hide');
+    overlay.classList.add("jt-open");
+    fab.classList.add("jt-hide");
     autoFill();
-    const comp = $('#jt-company');
-    if (!comp.value) { comp.focus(); } else { $('#jt-position').focus(); }
+    const comp = $("#jt-company");
+    if (!comp.value) {
+      comp.focus();
+    } else {
+      $("#jt-position").focus();
+    }
   }
 
   function closePanel() {
     isOpen = false;
-    overlay.classList.remove('jt-open');
-    fab.classList.remove('jt-hide');
+    overlay.classList.remove("jt-open");
+    fab.classList.remove("jt-hide");
   }
 
   function resetForm() {
-    ['#jt-company','#jt-position','#jt-roleId','#jt-location','#jt-salary','#jt-applyThrough','#jt-url']
-      .forEach(sel => { $(sel).value = ''; });
-    $('#jt-status').value = 'Applied';
-    root.querySelectorAll('.jt-platform-chip').forEach(c => c.classList.remove('jt-chip-selected'));
+    [
+      "#jt-company",
+      "#jt-position",
+      "#jt-roleId",
+      "#jt-location",
+      "#jt-salary",
+      "#jt-applyThrough",
+      "#jt-url",
+    ].forEach((sel) => {
+      $(sel).value = "";
+    });
+    $("#jt-status").value = "Applied";
+    shadow
+      .querySelectorAll(".jt-platform-chip")
+      .forEach((c) => c.classList.remove("jt-chip-selected"));
     // Reset actions to one empty row
-    actionsList.innerHTML = '';
+    actionsList.innerHTML = "";
     addActionRow();
     // Scroll body to top
-    const body = $('.jt-panel-body');
+    const body = $(".jt-panel-body");
     if (body) body.scrollTop = 0;
   }
 
   /* ---- Toast ---- */
   function showToast(msg, isError) {
     toastEl.textContent = msg;
-    toastEl.className = 'jt-toast jt-toast-show' + (isError ? ' jt-toast-err' : '');
+    toastEl.className =
+      "jt-toast jt-toast-show" + (isError ? " jt-toast-err" : "");
     clearTimeout(toastEl._t);
-    toastEl._t = setTimeout(() => { toastEl.className = 'jt-toast'; }, 2500);
+    toastEl._t = setTimeout(() => {
+      toastEl.className = "jt-toast";
+    }, 2500);
   }
 
   /* ---- Save directly to chrome.storage ---- */
-  const STORAGE_KEY = 'jobTracker_jobs';
+  const STORAGE_KEY = "jobTracker_jobs";
 
   function saveJob() {
-    const company  = $('#jt-company').value.trim();
-    const position = $('#jt-position').value.trim();
+    const company = $("#jt-company").value.trim();
+    const position = $("#jt-position").value.trim();
 
     if (!company || !position) {
-      showToast('Company and Position are required', true);
+      showToast("Company and Position are required", true);
       return;
     }
 
     const nextActions = [];
-    actionsList.querySelectorAll('.jt-action-input').forEach(input => {
+    actionsList.querySelectorAll(".jt-action-input").forEach((input) => {
       const val = input.value.trim();
       if (val) nextActions.push(val);
     });
@@ -755,91 +828,104 @@
     const jobData = {
       company,
       position,
-      roleId:   $('#jt-roleId').value.trim(),
-      status:   $('#jt-status').value,
-      location: $('#jt-location').value.trim(),
-      salary:   $('#jt-salary').value.trim(),
-      applyThrough: $('#jt-applyThrough').value.trim(),
-      url:      $('#jt-url').value.trim(),
+      roleId: $("#jt-roleId").value.trim(),
+      status: $("#jt-status").value,
+      location: $("#jt-location").value.trim(),
+      salary: $("#jt-salary").value.trim(),
+      applyThrough: $("#jt-applyThrough").value.trim(),
+      url: $("#jt-url").value.trim(),
       nextActions,
-      id:           Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-      dateAdded:    new Date().toISOString(),
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      dateAdded: new Date().toISOString(),
       dateModified: new Date().toISOString(),
     };
 
     try {
       chrome.storage.local.get(STORAGE_KEY, (result) => {
         if (chrome.runtime.lastError) {
-          showToast('Save failed – try the extension popup', true);
+          showToast("Save failed – try the extension popup", true);
           return;
         }
         const jobs = result[STORAGE_KEY] || [];
         jobs.unshift(jobData);
         chrome.storage.local.set({ [STORAGE_KEY]: jobs }, () => {
           if (chrome.runtime.lastError) {
-            showToast('Save failed – try the extension popup', true);
+            showToast("Save failed – try the extension popup", true);
           } else {
-            showToast('✓ Job saved to tracker!');
-            setTimeout(() => { closePanel(); resetForm(); }, 1000);
+            showToast("✓ Job saved to tracker!");
+            setTimeout(() => {
+              closePanel();
+              resetForm();
+            }, 1000);
           }
         });
       });
     } catch (e) {
-      showToast('Extension context lost – reload the page', true);
+      showToast("Extension context lost – reload the page", true);
     }
   }
 
   /* ---- Event listeners ---- */
-  fab.addEventListener('click', openPanel);
-  closeBtn.addEventListener('click', closePanel);
-  cancelBtn.addEventListener('click', () => { closePanel(); resetForm(); });
-  saveBtn.addEventListener('click', saveJob);
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) closePanel(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen) closePanel(); });
+  fab.addEventListener("click", openPanel);
+  closeBtn.addEventListener("click", closePanel);
+  cancelBtn.addEventListener("click", () => {
+    closePanel();
+    resetForm();
+  });
+  saveBtn.addEventListener("click", saveJob);
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closePanel();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && isOpen) closePanel();
+  });
 
   // Platform chips
-  root.querySelectorAll('.jt-platform-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      const chips = root.querySelectorAll('.jt-platform-chip');
-      const hidden = $('#jt-applyThrough');
-      if (chip.classList.contains('jt-chip-selected')) {
-        chip.classList.remove('jt-chip-selected');
-        hidden.value = '';
+  shadow.querySelectorAll(".jt-platform-chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const chips = shadow.querySelectorAll(".jt-platform-chip");
+      const hidden = $("#jt-applyThrough");
+      if (chip.classList.contains("jt-chip-selected")) {
+        chip.classList.remove("jt-chip-selected");
+        hidden.value = "";
       } else {
-        chips.forEach(c => c.classList.remove('jt-chip-selected'));
-        chip.classList.add('jt-chip-selected');
+        chips.forEach((c) => c.classList.remove("jt-chip-selected"));
+        chip.classList.add("jt-chip-selected");
         hidden.value = chip.dataset.value;
       }
     });
   });
 
   /* ---- Draggable FAB ---- */
-  let dragging = false, dragOffsetX = 0, dragOffsetY = 0, hasMoved = false;
+  let dragging = false,
+    dragOffsetX = 0,
+    dragOffsetY = 0,
+    hasMoved = false;
 
-  fab.addEventListener('pointerdown', (e) => {
+  fab.addEventListener("pointerdown", (e) => {
     dragging = true;
     hasMoved = false;
     const rect = fab.getBoundingClientRect();
     dragOffsetX = e.clientX - rect.left;
     dragOffsetY = e.clientY - rect.top;
     fab.setPointerCapture(e.pointerId);
-    fab.style.transition = 'none';
+    fab.style.transition = "none";
   });
 
-  fab.addEventListener('pointermove', (e) => {
+  fab.addEventListener("pointermove", (e) => {
     if (!dragging) return;
     hasMoved = true;
     const x = e.clientX - dragOffsetX;
     const y = e.clientY - dragOffsetY;
-    fab.style.left = x + 'px';
-    fab.style.top = y + 'px';
-    fab.style.right = 'auto';
-    fab.style.bottom = 'auto';
+    fab.style.left = x + "px";
+    fab.style.top = y + "px";
+    fab.style.right = "auto";
+    fab.style.bottom = "auto";
   });
 
-  fab.addEventListener('pointerup', (e) => {
+  fab.addEventListener("pointerup", (e) => {
     dragging = false;
-    fab.style.transition = '';
+    fab.style.transition = "";
     if (hasMoved) {
       e.stopImmediatePropagation();
     }

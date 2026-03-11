@@ -39,6 +39,10 @@ function bindEvents() {
   modalSaveBtn.addEventListener('click', saveJob);
   detailCloseBtn.addEventListener('click', closeDetailModal);
   detailDoneBtn.addEventListener('click', closeDetailModal);
+
+  // Bind initial action row's remove button
+  const initRemove = actionsList.querySelector('.remove-action');
+  if (initRemove) initRemove.addEventListener('click', function() { this.closest('li').remove(); });
   detailEditBtn.addEventListener('click', () => {
     closeDetailModal();
     if (currentDetailJobId) openEditModal(currentDetailJobId);
@@ -107,7 +111,7 @@ async function renderJobs() {
 function createJobCardHTML(job) {
   const statusClass = `status-${job.status.toLowerCase()}`;
   const date = formatDate(job.dateAdded);
-  const roleId = job.roleId ? `<span class="role-id">(${job.roleId})</span>` : '';
+  const roleId = job.roleId ? `<span class="role-id">(${escapeHtml(job.roleId)})</span>` : '';
   const location = job.location || '';
   const salary = job.salary || '';
 
@@ -253,18 +257,33 @@ async function saveJob() {
     nextActions,
   };
 
-  const editId = document.getElementById('editJobId').value;
-  if (editId) {
-    await StorageManager.updateJob(editId, jobData);
-    showToast('Application updated');
-  } else {
-    await StorageManager.addJob(jobData);
-    showToast('Application saved');
-  }
+  try {
+    const editId = document.getElementById('editJobId').value;
+    if (editId) {
+      await StorageManager.updateJob(editId, jobData);
+      showToast('Application updated');
+    } else {
+      // Duplicate check: same company + roleId
+      if (jobData.roleId) {
+        const jobs = await StorageManager.getJobs();
+        const dup = jobs.find(j => j.roleId && j.roleId.toLowerCase() === jobData.roleId.toLowerCase()
+          && j.company.toLowerCase() === jobData.company.toLowerCase());
+        if (dup) {
+          showToast(`Already applied – ${dup.roleId} at ${dup.company}`);
+          return;
+        }
+      }
+      await StorageManager.addJob(jobData);
+      showToast('Application saved');
+    }
 
-  closeAddModal();
-  await renderJobs();
-  await renderStats();
+    closeAddModal();
+    await renderJobs();
+    await renderStats();
+  } catch (err) {
+    console.error('Save failed:', err);
+    showToast('Save failed – please try again');
+  }
 }
 
 // ===== Detail Modal =====
@@ -360,14 +379,15 @@ function openDashboard() {
 function formatDate(isoStr) {
   if (!isoStr) return '—';
   const d = new Date(isoStr);
+  if (isNaN(d.getTime())) return '—';
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
 
 function escapeHtml(str) {
-  if (!str) return '';
+  if (str == null) return '';
   const div = document.createElement('div');
-  div.textContent = str;
+  div.textContent = String(str);
   return div.innerHTML;
 }
 

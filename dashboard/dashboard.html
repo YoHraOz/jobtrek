@@ -21,12 +21,27 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" id="searchInput" placeholder="Search jobs...">
         </div>
+        <div class="view-toggle" id="viewToggle">
+          <button class="view-btn active" data-view="table" title="Table view">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          </button>
+          <button class="view-btn" data-view="timeline" title="Timeline view">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="2" x2="12" y2="22"/><circle cx="12" cy="6" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="18" r="2" fill="currentColor"/><line x1="14" y1="6" x2="22" y2="6"/><line x1="2" y1="12" x2="10" y2="12"/><line x1="14" y1="18" x2="22" y2="18"/></svg>
+          </button>
+          <button class="view-btn" data-view="analytics" title="Analytics view">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </button>
+        </div>
         <select id="sortSelect" class="sort-select">
           <option value="date-desc">Newest First</option>
           <option value="date-asc">Oldest First</option>
           <option value="company-asc">Company A–Z</option>
           <option value="company-desc">Company Z–A</option>
         </select>
+        <button class="btn-export" id="exportBtn" title="Export to CSV">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
         <button class="btn-add" id="addBtn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -64,6 +79,52 @@
       </div>
     </div>
 
+    <!-- Analytics View -->
+    <div class="analytics-section" id="analyticsSection" style="display:none;">
+      <div class="analytics-grid" id="analyticsGrid">
+        <!-- Timeline Chart -->
+        <div class="analytics-card analytics-wide">
+          <div class="analytics-card-header">
+            <h3>Application Timeline</h3>
+            <span class="analytics-subtitle" id="timelineSubtitle">Last 8 weeks</span>
+          </div>
+          <div class="analytics-chart-bar" id="timelineChart"></div>
+        </div>
+
+        <!-- Source Breakdown -->
+        <div class="analytics-card">
+          <div class="analytics-card-header">
+            <h3>Applied Through</h3>
+          </div>
+          <div class="analytics-hbars" id="sourceChart"></div>
+        </div>
+
+        <!-- Response Rate / Funnel -->
+        <div class="analytics-card">
+          <div class="analytics-card-header">
+            <h3>Conversion Funnel</h3>
+          </div>
+          <div class="analytics-funnel" id="funnelChart"></div>
+        </div>
+
+        <!-- Top Companies -->
+        <div class="analytics-card">
+          <div class="analytics-card-header">
+            <h3>Top Companies</h3>
+          </div>
+          <div class="analytics-hbars" id="topCompaniesChart"></div>
+        </div>
+
+        <!-- Activity Heatmap (weekday) -->
+        <div class="analytics-card">
+          <div class="analytics-card-header">
+            <h3>Busiest Days</h3>
+          </div>
+          <div class="analytics-hbars" id="weekdayChart"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Table -->
     <div class="table-wrapper">
       <table class="job-table">
@@ -85,6 +146,16 @@
         </tbody>
       </table>
       <div class="empty-dash" id="emptyDash" style="display:none;">
+        <div class="empty-icon">📋</div>
+        <h3>No applications found</h3>
+        <p>Add your first job application to get started</p>
+      </div>
+    </div>
+
+    <!-- Timeline View -->
+    <div class="timeline-wrapper" id="timelineView" style="display:none;">
+      <div class="timeline" id="timelineBody"></div>
+      <div class="empty-dash" id="emptyTimeline" style="display:none;">
         <div class="empty-icon">📋</div>
         <h3>No applications found</h3>
         <p>Add your first job application to get started</p>

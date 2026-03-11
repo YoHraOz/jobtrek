@@ -12,8 +12,6 @@ let currentDrawerJobId = null;
 // DOM refs
 const tableBody = document.getElementById('tableBody');
 const emptyDash = document.getElementById('emptyDash');
-const pageTitle = document.getElementById('pageTitle');
-const topbarCount = document.getElementById('topbarCount');
 const searchInput = document.getElementById('searchInput');
 const sortSelect = document.getElementById('sortSelect');
 const addBtn = document.getElementById('addBtn');
@@ -41,13 +39,12 @@ async function init() {
 
 // ===== Bind Events =====
 function bindEvents() {
-  // Sidebar nav
-  document.querySelectorAll('.nav-item').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentFilter = btn.dataset.filter;
-      pageTitle.textContent = btn.textContent.replace(/\d+/g, '').trim();
+  // Stat card filters
+  document.querySelectorAll('.stat-card[data-filter]').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      currentFilter = card.dataset.filter;
       renderTable();
     });
   });
@@ -70,6 +67,22 @@ function bindEvents() {
   modalCancelBtn.addEventListener('click', closeAddModal);
   modalSaveBtn.addEventListener('click', saveJob);
   addActionBtn.addEventListener('click', addActionRow);
+
+  // Platform chips
+  document.querySelectorAll('.platform-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const chips = document.querySelectorAll('.platform-chip');
+      const hidden = document.getElementById('inputApplyThrough');
+      if (chip.classList.contains('selected')) {
+        chip.classList.remove('selected');
+        hidden.value = '';
+      } else {
+        chips.forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+        hidden.value = chip.dataset.value;
+      }
+    });
+  });
 
   // Drawer
   drawerCloseBtn.addEventListener('click', closeDrawer);
@@ -94,7 +107,6 @@ function bindEvents() {
 // ===== Render All =====
 function renderAll() {
   renderStats();
-  renderNavCounts();
   renderTable();
 }
 
@@ -105,21 +117,14 @@ function renderStats() {
   const interviewing = allJobs.filter(j => j.status === 'Interviewing').length;
   const offer = allJobs.filter(j => j.status === 'Offer').length;
   const rejected = allJobs.filter(j => j.status === 'Rejected').length;
+  const saved = allJobs.filter(j => j.status === 'Saved').length;
 
   document.getElementById('dashStatTotal').textContent = total;
   document.getElementById('dashStatApplied').textContent = applied;
   document.getElementById('dashStatInterview').textContent = interviewing;
   document.getElementById('dashStatOffer').textContent = offer;
   document.getElementById('dashStatRejected').textContent = rejected;
-}
-
-function renderNavCounts() {
-  document.getElementById('navAll').textContent = allJobs.length;
-  document.getElementById('navApplied').textContent = allJobs.filter(j => j.status === 'Applied').length;
-  document.getElementById('navInterviewing').textContent = allJobs.filter(j => j.status === 'Interviewing').length;
-  document.getElementById('navOffer').textContent = allJobs.filter(j => j.status === 'Offer').length;
-  document.getElementById('navRejected').textContent = allJobs.filter(j => j.status === 'Rejected').length;
-  document.getElementById('navSaved').textContent = allJobs.filter(j => j.status === 'Saved').length;
+  document.getElementById('dashStatSaved').textContent = saved;
 }
 
 // ===== Render Table =====
@@ -137,15 +142,13 @@ function renderTable() {
       (j.company || '').toLowerCase().includes(searchQuery) ||
       (j.position || '').toLowerCase().includes(searchQuery) ||
       (j.location || '').toLowerCase().includes(searchQuery) ||
-      (j.industry || '').toLowerCase().includes(searchQuery) ||
+      (j.applyThrough || '').toLowerCase().includes(searchQuery) ||
       (j.roleId || '').toLowerCase().includes(searchQuery)
     );
   }
 
   // Sort
   jobs = sortJobs(jobs, currentSort);
-
-  topbarCount.textContent = `${jobs.length} job${jobs.length !== 1 ? 's' : ''}`;
 
   if (jobs.length === 0) {
     tableBody.innerHTML = '';
@@ -182,10 +185,24 @@ function renderTable() {
   });
 }
 
+function platformBadge(value) {
+  if (!value) return '<span class="text-muted">—</span>';
+  const cls = 'platform-badge platform-' + value.toLowerCase().replace(/\s+/g, '-');
+  return `<span class="${cls}">${escapeHtml(value)}</span>`;
+}
+
 function createRowHTML(job) {
   const statusClass = `status-${job.status.toLowerCase()}`;
   const date = formatDate(job.dateAdded);
   const roleId = job.roleId ? `<span class="role-id">(${escapeHtml(job.roleId)})</span>` : '';
+
+  // Next actions preview
+  let actionsPreview = '<span class="text-muted">—</span>';
+  if (job.nextActions && job.nextActions.length > 0) {
+    const first = escapeHtml(job.nextActions[0]);
+    const more = job.nextActions.length > 1 ? ` <span class="text-muted">+${job.nextActions.length - 1}</span>` : '';
+    actionsPreview = `<span class="next-action-preview">• ${first}${more}</span>`;
+  }
 
   return `
     <tr data-id="${job.id}">
@@ -193,8 +210,9 @@ function createRowHTML(job) {
       <td><span class="table-role">${escapeHtml(job.position)} ${roleId}</span></td>
       <td><span class="job-status-badge ${statusClass}">${escapeHtml(job.status)}</span></td>
       <td>${escapeHtml(job.location || '—')}</td>
-      <td>${escapeHtml(job.industry || '—')}</td>
+      <td>${platformBadge(job.applyThrough)}</td>
       <td>${escapeHtml(job.salary || '—')}</td>
+      <td class="col-next-actions-cell">${actionsPreview}</td>
       <td><span class="table-date">${date}</span></td>
       <td>
         <div class="table-actions">
@@ -243,7 +261,10 @@ async function openEditModal(id) {
   document.getElementById('inputStatus').value = job.status || 'Applied';
   document.getElementById('inputLocation').value = job.location || '';
   document.getElementById('inputSalary').value = job.salary || '';
-  document.getElementById('inputIndustry').value = job.industry || '';
+  document.getElementById('inputApplyThrough').value = job.applyThrough || '';
+  document.querySelectorAll('.platform-chip').forEach(c => {
+    c.classList.toggle('selected', c.dataset.value === job.applyThrough);
+  });
   document.getElementById('inputUrl').value = job.url || '';
 
   actionsList.innerHTML = '';
@@ -269,7 +290,8 @@ function clearForm() {
   document.getElementById('inputStatus').value = 'Applied';
   document.getElementById('inputLocation').value = '';
   document.getElementById('inputSalary').value = '';
-  document.getElementById('inputIndustry').value = '';
+  document.getElementById('inputApplyThrough').value = '';
+  document.querySelectorAll('.platform-chip').forEach(c => c.classList.remove('selected'));
   document.getElementById('inputUrl').value = '';
   actionsList.innerHTML = '';
   addActionRow();
@@ -307,7 +329,7 @@ async function saveJob() {
     status: document.getElementById('inputStatus').value,
     location: document.getElementById('inputLocation').value.trim(),
     salary: document.getElementById('inputSalary').value.trim(),
-    industry: document.getElementById('inputIndustry').value.trim(),
+    applyThrough: document.getElementById('inputApplyThrough').value.trim(),
     url: document.getElementById('inputUrl').value.trim(),
     nextActions,
   };
@@ -361,8 +383,8 @@ async function openDrawer(id) {
         <div class="drawer-value">${escapeHtml(job.salary || '—')}</div>
       </div>
       <div class="drawer-section">
-        <div class="drawer-label">Industry</div>
-        <div class="drawer-value">${escapeHtml(job.industry || '—')}</div>
+        <div class="drawer-label">Applied Through</div>
+        <div class="drawer-value">${platformBadge(job.applyThrough)}</div>
       </div>
       <div class="drawer-section">
         <div class="drawer-label">Date Applied</div>

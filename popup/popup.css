@@ -91,11 +91,6 @@ body {
   height: 28px;
   border-radius: var(--radius);
   object-fit: contain;
-    /* background: var(--accent-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px; */
 }
 
 .header h1 {
@@ -189,6 +184,33 @@ body {
   justify-content: space-between;
   margin-bottom: 6px;
 }
+
+.job-card-badges {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.platform-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.platform-icon svg {
+  width: 14px;
+  height: 14px;
+}
+.platform-icon-linkedin { color: #4da3e8; }
+.platform-icon-indeed { color: #6b8fff; }
+.platform-icon-naukri { color: #4dba87; }
+.platform-icon-company-website { color: #f0b449; }
+.platform-icon-referral { color: #af82ff; }
+.platform-icon-glassdoor { color: #3dc9a3; }
+.platform-icon-other { color: #9b9b9b; }
 
 .job-company {
   font-size: 14px;
@@ -324,7 +346,7 @@ body {
 
 .fab:hover {
   background: var(--accent-hover);
-  transform: scale(1.05);
+  transform: scale(1.08);
   transform-origin: center center;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
 }
@@ -332,6 +354,8 @@ body {
 .fab svg {
   width: 22px;
   height: 22px;
+  display: block;
+  margin: 0;
 }
 
 /* ===== Footer / Dashboard Button ===== */
@@ -516,6 +540,100 @@ body {
 
 .form-row .form-group {
   flex: 1;
+}
+
+/* Platform Chips */
+.platform-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.platform-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.platform-chip svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.platform-chip:hover {
+  border-color: var(--border-light);
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.platform-chip.selected {
+  border-color: var(--accent);
+  background: var(--accent-muted);
+  color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.platform-chip.selected svg {
+  color: var(--accent);
+}
+
+/* Platform Badges (detail view) */
+.platform-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.platform-linkedin {
+  background: rgba(10, 102, 194, 0.15);
+  color: #4da3e8;
+}
+
+.platform-indeed {
+  background: rgba(44, 94, 255, 0.15);
+  color: #6b8fff;
+}
+
+.platform-naukri {
+  background: rgba(77, 186, 135, 0.15);
+  color: #4dba87;
+}
+
+.platform-company-website {
+  background: rgba(240, 180, 73, 0.15);
+  color: #f0b449;
+}
+
+.platform-referral {
+  background: rgba(175, 130, 255, 0.15);
+  color: #af82ff;
+}
+
+.platform-glassdoor {
+  background: rgba(0, 175, 133, 0.15);
+  color: #3dc9a3;
+}
+
+.platform-other {
+  background: rgba(155, 155, 155, 0.12);
+  color: #9b9b9b;
 }
 
 /* Next Actions */

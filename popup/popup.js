@@ -21,7 +21,6 @@ const detailBodyEl = document.getElementById('detailBody');
 const addActionBtn = document.getElementById('addActionBtn');
 const actionsList = document.getElementById('actionsList');
 const toastEl = document.getElementById('toast');
-const jobCountEl = document.getElementById('jobCount');
 
 let currentDetailJobId = null;
 
@@ -47,6 +46,22 @@ function bindEvents() {
   addActionBtn.addEventListener('click', addActionRow);
   dashboardBtn.addEventListener('click', openDashboard);
 
+  // Platform chips
+  document.querySelectorAll('.platform-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const chips = document.querySelectorAll('.platform-chip');
+      const hidden = document.getElementById('inputApplyThrough');
+      if (chip.classList.contains('selected')) {
+        chip.classList.remove('selected');
+        hidden.value = '';
+      } else {
+        chips.forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+        hidden.value = chip.dataset.value;
+      }
+    });
+  });
+
   // Close modals on overlay click
   addModal.addEventListener('click', (e) => { if (e.target === addModal) closeAddModal(); });
   detailModal.addEventListener('click', (e) => { if (e.target === detailModal) closeDetailModal(); });
@@ -59,13 +74,11 @@ async function renderJobs() {
   if (jobs.length === 0) {
     jobListEl.style.display = 'none';
     emptyStateEl.style.display = 'flex';
-    jobCountEl.textContent = '';
     return;
   }
 
   jobListEl.style.display = 'block';
   emptyStateEl.style.display = 'none';
-  jobCountEl.textContent = `· ${jobs.length}`;
 
   // Show recent 15 in popup
   const recent = jobs.slice(0, 15);
@@ -108,7 +121,10 @@ function createJobCardHTML(job) {
       </button>
       <div class="job-card-top">
         <div class="job-company">${escapeHtml(job.company)}</div>
-        <span class="job-status-badge ${statusClass}">${escapeHtml(job.status)}</span>
+        <div class="job-card-badges">
+          ${job.applyThrough ? platformIcon(job.applyThrough) : ''}
+          <span class="job-status-badge ${statusClass}">${escapeHtml(job.status)}</span>
+        </div>
       </div>
       <div class="job-role">${escapeHtml(job.position)} ${roleId}</div>
       <div class="job-meta">
@@ -156,7 +172,10 @@ async function openEditModal(id) {
   document.getElementById('inputStatus').value = job.status || 'Applied';
   document.getElementById('inputLocation').value = job.location || '';
   document.getElementById('inputSalary').value = job.salary || '';
-  document.getElementById('inputIndustry').value = job.industry || '';
+  document.getElementById('inputApplyThrough').value = job.applyThrough || '';
+  document.querySelectorAll('.platform-chip').forEach(c => {
+    c.classList.toggle('selected', c.dataset.value === job.applyThrough);
+  });
   document.getElementById('inputUrl').value = job.url || '';
 
   // Populate next actions
@@ -185,7 +204,8 @@ function clearForm() {
   document.getElementById('inputStatus').value = 'Applied';
   document.getElementById('inputLocation').value = '';
   document.getElementById('inputSalary').value = '';
-  document.getElementById('inputIndustry').value = '';
+  document.getElementById('inputApplyThrough').value = '';
+  document.querySelectorAll('.platform-chip').forEach(c => c.classList.remove('selected'));
   document.getElementById('inputUrl').value = '';
   actionsList.innerHTML = '';
   addActionRow();
@@ -228,7 +248,7 @@ async function saveJob() {
     status: document.getElementById('inputStatus').value,
     location: document.getElementById('inputLocation').value.trim(),
     salary: document.getElementById('inputSalary').value.trim(),
-    industry: document.getElementById('inputIndustry').value.trim(),
+    applyThrough: document.getElementById('inputApplyThrough').value.trim(),
     url: document.getElementById('inputUrl').value.trim(),
     nextActions,
   };
@@ -248,6 +268,29 @@ async function saveJob() {
 }
 
 // ===== Detail Modal =====
+function platformBadge(value) {
+  if (!value) return '<span style="color:var(--text-muted);">—</span>';
+  const cls = 'platform-badge platform-' + value.toLowerCase().replace(/\s+/g, '-');
+  return `<span class="${cls}">${escapeHtml(value)}</span>`;
+}
+
+const PLATFORM_ICONS = {
+  'LinkedIn':  '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>',
+  'Indeed':    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.566 21.552v-8.678c0-.726.061-1.352.184-1.878a4.092 4.092 0 01.585-1.428c.27-.399.612-.726 1.027-.952.415-.234.916-.349 1.49-.349.857 0 1.493.282 1.905.849.415.567.621 1.39.621 2.476v9.96h3.063V10.878c0-.96-.104-1.8-.311-2.52a4.718 4.718 0 00-.952-1.836 3.977 3.977 0 00-1.612-1.132c-.648-.257-1.413-.388-2.3-.388-1.06 0-1.97.245-2.737.726a4.473 4.473 0 00-1.78 2.043h-.06V2.448H7.626v19.104h3.94zM13.4 4.145a2.07 2.07 0 002.07-2.073A2.07 2.07 0 0013.4 0a2.07 2.07 0 00-2.07 2.072 2.07 2.07 0 002.07 2.073z"/></svg>',
+  'Naukri':    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm4 0h-2v-6h2v6zm-2-8a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm-4 0a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/></svg>',
+  'Company Website': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>',
+  'Referral':  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>',
+  'Glassdoor': '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.14 2H6.86A1.86 1.86 0 005 3.86v.28h10.28a1.86 1.86 0 011.86 1.86v12h.28A1.86 1.86 0 0019 16.14V3.86A1.86 1.86 0 0017.14 2zM6.86 22h10.28A1.86 1.86 0 0019 20.14v-.28H8.72a1.86 1.86 0 01-1.86-1.86V6H6.58A1.86 1.86 0 005 7.86v12.28A1.86 1.86 0 006.86 22z"/></svg>',
+  'Other':     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>'
+};
+
+function platformIcon(value) {
+  if (!value) return '';
+  const key = value.toLowerCase().replace(/\s+/g, '-');
+  const svg = PLATFORM_ICONS[value] || PLATFORM_ICONS['Other'];
+  return `<span class="platform-icon platform-icon-${key}" title="${escapeHtml(value)}">${svg}</span>`;
+}
+
 async function openDetailModal(id) {
   const job = await StorageManager.getJob(id);
   if (!job) return;
@@ -282,8 +325,8 @@ async function openDetailModal(id) {
         <div class="detail-value">${escapeHtml(job.salary || '—')}</div>
       </div>
       <div class="detail-section">
-        <div class="detail-label">Industry</div>
-        <div class="detail-value">${escapeHtml(job.industry || '—')}</div>
+        <div class="detail-label">Applied Through</div>
+        <div class="detail-value">${platformBadge(job.applyThrough)}</div>
       </div>
       <div class="detail-section">
         <div class="detail-label">Date Applied</div>

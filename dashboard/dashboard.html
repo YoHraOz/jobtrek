@@ -8,53 +8,13 @@
 </head>
 <body>
 
-  <!-- ===== Sidebar ===== -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <img class="sidebar-icon" src="../icons/icon48.png" alt="Job Tracker">
-      <span class="sidebar-title">Job Tracker</span>
-    </div>
-    <nav class="sidebar-nav">
-      <button class="nav-item active" data-filter="all">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-        All Applications
-        <span class="nav-count" id="navAll">0</span>
-      </button>
-      <button class="nav-item" data-filter="Applied">
-        <span class="nav-dot" style="background:var(--accent);"></span>
-        Applied
-        <span class="nav-count" id="navApplied">0</span>
-      </button>
-      <button class="nav-item" data-filter="Interviewing">
-        <span class="nav-dot" style="background:var(--warning);"></span>
-        Interviewing
-        <span class="nav-count" id="navInterviewing">0</span>
-      </button>
-      <button class="nav-item" data-filter="Offer">
-        <span class="nav-dot" style="background:var(--success);"></span>
-        Offer
-        <span class="nav-count" id="navOffer">0</span>
-      </button>
-      <button class="nav-item" data-filter="Rejected">
-        <span class="nav-dot" style="background:var(--danger);"></span>
-        Rejected
-        <span class="nav-count" id="navRejected">0</span>
-      </button>
-      <button class="nav-item" data-filter="Saved">
-        <span class="nav-dot" style="background:#af82ff;"></span>
-        Saved
-        <span class="nav-count" id="navSaved">0</span>
-      </button>
-    </nav>
-  </aside>
-
   <!-- ===== Main Content ===== -->
   <main class="main">
     <!-- Top Bar -->
     <div class="topbar">
       <div class="topbar-left">
-        <h1 id="pageTitle">All Applications</h1>
-        <span class="topbar-count" id="topbarCount">0 jobs</span>
+        <img class="header-icon" src="../icons/icon48.png" alt="Job Tracker">
+        <h1 id="pageTitle">Job Tracker</h1>
       </div>
       <div class="topbar-actions">
         <div class="search-box">
@@ -76,27 +36,31 @@
       </div>
     </div>
 
-    <!-- Stats Cards -->
+    <!-- Stats Cards (Clickable Filters) -->
     <div class="stats-row" id="statsRow">
-      <div class="stat-card">
+      <div class="stat-card active" data-filter="all">
         <div class="stat-number" id="dashStatTotal">0</div>
         <div class="stat-label">Total</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" data-filter="Applied">
         <div class="stat-number accent" id="dashStatApplied">0</div>
         <div class="stat-label">Applied</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" data-filter="Interviewing">
         <div class="stat-number warning" id="dashStatInterview">0</div>
         <div class="stat-label">Interviewing</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" data-filter="Offer">
         <div class="stat-number success" id="dashStatOffer">0</div>
         <div class="stat-label">Offers</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" data-filter="Rejected">
         <div class="stat-number danger" id="dashStatRejected">0</div>
         <div class="stat-label">Rejected</div>
+      </div>
+      <div class="stat-card" data-filter="Saved">
+        <div class="stat-number saved" id="dashStatSaved">0</div>
+        <div class="stat-label">Saved</div>
       </div>
     </div>
 
@@ -109,8 +73,9 @@
             <th class="col-role">Position</th>
             <th class="col-status">Status</th>
             <th class="col-location">Location</th>
-            <th class="col-industry">Industry</th>
+            <th class="col-apply-through">Applied Through</th>
             <th class="col-salary">Salary</th>
+            <th class="col-next-actions">Next Actions</th>
             <th class="col-date">Date</th>
             <th class="col-actions"></th>
           </tr>
@@ -176,15 +141,43 @@
             <input type="text" id="inputSalary" placeholder="e.g. $150k">
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Industry</label>
-            <input type="text" id="inputIndustry" placeholder="e.g. Technology">
+        <div class="form-group">
+          <label>Applied Through</label>
+          <input type="hidden" id="inputApplyThrough">
+          <div class="platform-chips" id="platformChips">
+              <button type="button" class="platform-chip" data-value="LinkedIn">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                LinkedIn
+              </button>
+              <button type="button" class="platform-chip" data-value="Indeed">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.566 21.552v-8.678c0-.726.061-1.352.184-1.878a4.092 4.092 0 01.585-1.428c.27-.399.612-.726 1.027-.952.415-.234.916-.349 1.49-.349.857 0 1.493.282 1.905.849.415.567.621 1.39.621 2.476v9.96h3.063V10.878c0-.96-.104-1.8-.311-2.52a4.718 4.718 0 00-.952-1.836 3.977 3.977 0 00-1.612-1.132c-.648-.257-1.413-.388-2.3-.388-1.06 0-1.97.245-2.737.726a4.473 4.473 0 00-1.78 2.043h-.06V2.448H7.626v19.104h3.94zM13.4 4.145a2.07 2.07 0 002.07-2.073A2.07 2.07 0 0013.4 0a2.07 2.07 0 00-2.07 2.072 2.07 2.07 0 002.07 2.073z"/></svg>
+                Indeed
+              </button>
+              <button type="button" class="platform-chip" data-value="Naukri">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm4 0h-2v-6h2v6zm-2-8a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm-4 0a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/></svg>
+                Naukri
+              </button>
+              <button type="button" class="platform-chip" data-value="Company Website">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                Website
+              </button>
+              <button type="button" class="platform-chip" data-value="Referral">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                Referral
+              </button>
+              <button type="button" class="platform-chip" data-value="Glassdoor">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.14 2H6.86A1.86 1.86 0 005 3.86v.28h10.28a1.86 1.86 0 011.86 1.86v12h.28A1.86 1.86 0 0019 16.14V3.86A1.86 1.86 0 0017.14 2zM6.86 22h10.28A1.86 1.86 0 0019 20.14v-.28H8.72a1.86 1.86 0 01-1.86-1.86V6H6.58A1.86 1.86 0 005 7.86v12.28A1.86 1.86 0 006.86 22z"/></svg>
+                Glassdoor
+              </button>
+              <button type="button" class="platform-chip chip-other" data-value="Other">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                Other
+              </button>
+            </div>
           </div>
-          <div class="form-group">
-            <label>URL</label>
-            <input type="url" id="inputUrl" placeholder="https://...">
-          </div>
+        <div class="form-group">
+          <label>URL</label>
+          <input type="url" id="inputUrl" placeholder="https://...">
         </div>
         <div class="form-group">
           <label>Next Actions</label>
